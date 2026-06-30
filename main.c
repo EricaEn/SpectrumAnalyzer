@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <complex.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 #include <stdbool.h>
 
 #include "AudioReader.h"
+#include "FFT.h"
 
 int main(){
     int number = 0;
@@ -20,6 +22,10 @@ int main(){
         break;
         case 2:
         s = "sound/music-sample-44100hz-16bit.wav";
+        break;
+        case 3:
+        s = "sound/tone_440.wav";
+        break;
     }
 
     const char *filename = s;
@@ -34,7 +40,14 @@ int main(){
         return -1;
     }
     
-    printMeta(&audio.metadata);
+    //printMeta(&audio.metadata);
+    //printSamples(audio.samples, audio.metadata.sampleCount, 100);
+
+    dft(1024, audio.samples, audio.metadata.sampleCount, audio.metadata.sampleRate);
+    //float samples[] = {1,0,-1,0,1,0,-1,0};
+    //int sampleSize = sizeof(samples) / sizeof(samples[0]);
+
+    //dft(8, samples, sampleSize, 8000);
 
     return 0;
 }
