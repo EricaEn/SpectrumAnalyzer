@@ -40,14 +40,46 @@ int main(){
         return -1;
     }
     
-    //printMeta(&audio.metadata);
+    printMeta(&audio.metadata);
     //printSamples(audio.samples, audio.metadata.sampleCount, 100);
 
-    dft(1024, audio.samples, audio.metadata.sampleCount, audio.metadata.sampleRate);
+    /*FFT loop*/
+    int N = 1014;
+    float* fft_buffer = malloc(N * sizeof(float));
+    float* amp_arr = malloc(N * sizeof(float));
+
+    for (int i = 0; i < audio.metadata.sampleCount - N; i++) {
+        if (i + N >= audio.metadata.dataSize) {
+            //TODO: adjust last frame
+            //Adjust i so that it is exactly N left
+        }
+
+
+        
+        for (int j = 0; j < N; j++) {
+            fft_buffer[j] = audio.samples[i++];
+        }
+
+        // Implment Hanning window later to avoid clicks
+        
+
+
+
+        fft(fft_buffer, N, amp_arr);
+    }
+    
+    
+    
+
+
+
+
+
+    //dft(1024, audio.samples, audio.metadata.sampleCount, audio.metadata.sampleRate);
     //float samples[] = {1,0,-1,0,1,0,-1,0};
     //int sampleSize = sizeof(samples) / sizeof(samples[0]);
 
     //dft(8, samples, sampleSize, 8000);
-
+    free(audio.samples);
     return 0;
 }

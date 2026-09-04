@@ -1,8 +1,10 @@
 # Spectrum Analyzer
 
-This is a summer learning project where I am building a spectrum analyzer in C.
+This is a learning project where I am building a spectrum analyzer in C.
 
 I am building the project step by step to learn how audio analysis works, starting with WAV parsing and PCM samples, then moving on to DFT/FFT, amplitude calculation, playback, and visualization.
+
+Currently I'm using the kissFFT library for FFT but the intention is to implement my own algorithm later.
 
 ## Current status
 
@@ -15,14 +17,9 @@ The program can currently:
 * Run a naive DFT on a block of samples
 * Print real part, imaginary part, magnitude, and frequency bin information
 * Detect the dominant frequency bin in a known test signal
+* Calculate the amplitude in decibel in a block of N samples using the kissFFT algorithm
 
-A 440 Hz sine wave test file was used to verify the DFT implementation. With a sample rate of 44100 Hz and a block size of 1024 samples, the expected bin is:
 
-```text
-k ≈ 440 * 1024 / 44100 ≈ 10.22
-```
-
-The largest magnitude appears at bin 10, which confirms that the DFT finds the expected frequency region.
 
 ## WAV support
 
@@ -60,13 +57,16 @@ where:
 
 For real-valued audio input, only bins `0..N/2` are needed for a magnitude spectrum. The upper half of the DFT result represents mirrored negative-frequency information.
 
+## FFT implementation
+
+Currently kissFFT is used for the FFT calculations. The intention is to implement my own algorithm of FFT later in the project,
+
 ## TODO
 
 Planned next steps:
 
-* Improve amplitude scaling
-* Add window functions
-* Implement FFT
+
+* Add window functions (Hanning window)
 * Add audio playback
 * Add real-time audio input
 * Add visualization
