@@ -3,8 +3,8 @@ CFLAGS = -Wall -Wextra -std=c11
 
 TARGET = main
 
-SRC = main.c AudioReader.c FFT.c
-OBJ = main.o AudioReader.o FFT.o
+SRC = main.c AudioReader.c FFT.c kissFFT/kiss_fft.c kissFFT/kiss_fftr.c
+OBJ = main.o AudioReader.o FFT.o kissFFT/kiss_fft.o kissFFT/kiss_fftr.o
 HEADERS = AudioReader.h FFT.h
 
 $(TARGET): $(OBJ)
