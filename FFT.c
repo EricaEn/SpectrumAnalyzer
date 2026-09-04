@@ -13,7 +13,6 @@ void fft(float* bin, int N, float* ampArr){
     kiss_fftr_cfg cfg = kiss_fftr_alloc(N, 0, NULL, NULL);
     kiss_fft_cpx *cpx = malloc(N/2 + 1 * sizeof(kiss_fft_cpx));
 
-    printf("FFT is running\n");
     kiss_fftr(cfg, bin, cpx);
 
     // for (int i = 0; i < 10; i++) {
@@ -26,7 +25,7 @@ void fft(float* bin, int N, float* ampArr){
         ampArr[i] = 10.0 * log10f(pow(cpx[i].r, 2) + pow(cpx[i].i, 2)); //20.0 * log10f( sqrtf(pow(cpx[i].r, 2) + pow(cpx[i].i, 2)) );
 
         // if (i < 10) {
-        //     printf("sqrt{%f ^2 + %f ^2} = %f \n", cpx[i].r, cpx[i].i, ampArr[i]);
+        //     printf("Bin %d: %f \n", i, ampArr[i]);
         // }
     }
     kiss_fftr_free(cfg);
