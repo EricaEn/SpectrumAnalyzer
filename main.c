@@ -46,7 +46,9 @@ int main(){
     /*FFT loop*/
     int N = 1014;
     float* fft_buffer = malloc(N * sizeof(float));
-    float* amp_arr = malloc(N * sizeof(float));
+    float* amp_arr = malloc(((N / 2) + 1) * sizeof(float));
+
+    // Implment Hanning window later to avoid clicks
 
     for (int i = 0; i < audio.metadata.sampleCount - N; i++) {
         if (i + N >= audio.metadata.dataSize) {
@@ -60,12 +62,15 @@ int main(){
             fft_buffer[j] = audio.samples[i++];
         }
 
-        // Implment Hanning window later to avoid clicks
-        
-
-
-
+        //i -= N / 2;
         fft(fft_buffer, N, amp_arr);
+
+        printf("Decibel values:\n");
+        for (int j = N/8; j < N/4; j++) {
+            printf("%f ", amp_arr[j]);
+        }
+
+
     }
     
     

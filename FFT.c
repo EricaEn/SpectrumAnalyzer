@@ -16,22 +16,19 @@ void fft(float* bin, int N, float* ampArr){
     printf("FFT is running\n");
     kiss_fftr(cfg, bin, cpx);
 
-    for (int i = 0; i < 10; i++) {
-        printf("Real %f ", cpx[i].r);
-        printf("Img %f", cpx[i].i);
-        printf("\n");
-    }
+    // for (int i = 0; i < 10; i++) {
+    //     printf("Real %f ", cpx[i].r);
+    //     printf("Img %f", cpx[i].i);
+    //     printf("\n");
+    // }
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < ((N/2) + 1); i++) {
         ampArr[i] = 10.0 * log10f(pow(cpx[i].r, 2) + pow(cpx[i].i, 2)); //20.0 * log10f( sqrtf(pow(cpx[i].r, 2) + pow(cpx[i].i, 2)) );
 
-        if (i < 10) {
-            printf("sqrt{%f ^2 + %f ^2} = %f \n", cpx[i].r, cpx[i].i, ampArr[i]);
-        }
+        // if (i < 10) {
+        //     printf("sqrt{%f ^2 + %f ^2} = %f \n", cpx[i].r, cpx[i].i, ampArr[i]);
+        // }
     }
-
-
-
     kiss_fftr_free(cfg);
 }
 
