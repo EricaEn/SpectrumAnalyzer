@@ -59,7 +59,7 @@ For real-valued audio input, only bins `0..N/2` are needed for a magnitude spect
 
 ## FFT implementation
 
-Currently kissFFT is used for the FFT calculations. The intention is to implement my own algorithm of FFT later in the project,
+Currently ([kissFFT](https://github.com/mborgerding/kissfft)) is used for the FFT calculations. The intention is to implement my own algorithm of FFT later in the project.
 
 ## TODO
 

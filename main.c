@@ -1,6 +1,5 @@
 #include <errno.h>
 #include <complex.h>
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,6 +8,9 @@
 
 #include "AudioReader.h"
 #include "FFT.h"
+#include "Visualize.h"
+
+#define N 1024
 
 int main(){
     int number = 0;
@@ -44,7 +46,6 @@ int main(){
     //printSamples(audio.samples, audio.metadata.sampleCount, 100);
 
     /*FFT loop*/
-    int N = 1014;
     float* fft_buffer = malloc(N * sizeof(float));
     float* amp_arr = malloc(((N / 2) + 1) * sizeof(float));
 
@@ -56,8 +57,6 @@ int main(){
             //Adjust i so that it is exactly N left
         }
 
-
-        
         for (int j = 0; j < N; j++) {
             fft_buffer[j] = audio.samples[i++];
         }
@@ -65,12 +64,7 @@ int main(){
         //i -= N / 2;
         fft(fft_buffer, N, amp_arr);
 
-        printf("Decibel values:\n");
-        for (int j = N/8; j < N/4; j++) {
-            printf("%f ", amp_arr[j]);
-        }
-
-
+        ampArrToPercent(amp_arr, ((N / 2) + 1));
     }
     
     
