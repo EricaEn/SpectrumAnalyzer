@@ -92,6 +92,7 @@ void printMeta(struct WavMetadata *data){
     printf("Byte rate: %d\n", data->byteRate);
     printf("Block align: %d\n", data->blockAlign);
     printf("Bits per sample: %d\n", data->bitsPerSample);
+    printf("Bytes per sample: %d\n", data->bytesPerSample);
 }
 
 /*
@@ -121,67 +122,54 @@ void printSamples(float *buffer, int bufferSize, int numberOfSamples){
 
 /*
 Normalizes the 16 bit signed integer values to float values
+Caller function needs to free the return value *float when done
 */
-float* buffer16Bit(int i, uint8_t *buffer, struct WavMetadata *data){
-    float *normBuffer = malloc(data->dataSize/2 * sizeof(float));
-    if (normBuffer == NULL) {
-        printf("Allocating memory failed %s\n", strerror(errno));
-        return NULL;
-    }
-    int j = 0;
-    for (int k = i; i < (k + data->dataSize); i+=2) {
-        int16_t temp = buffer[i];
-        temp |= buffer[i+1] << 8;
-        normBuffer[j++] = temp / 32768.0;
-    }
-
-    return normBuffer;
-}
-
-/*
-Normalizes the 8 bit unsigned integer values to floas values
-*/
-float* buffer8Bit(int i, uint8_t *buffer, struct WavMetadata *data){
+float* normalize(int i, uint8_t *buffer, struct WavMetadata *data){
     float *normBuffer = malloc(data->sampleCount * sizeof(float));
     if (normBuffer == NULL) {
         printf("Allocating memory failed %s\n", strerror(errno));
         return NULL;
     }
+
     int j = 0;
-    for (int k = i; i < (k + data->dataSize); i++) {
-        uint8_t temp = buffer[i];
-        normBuffer[j++] = (temp-128) / 128.0;
+    if (data->bitsPerSample == 16){
+        for (int k = i; i < (k + data->dataSize); i+=2) {
+            int16_t temp = buffer[i];
+            temp |= buffer[i+1] << 8;
+            normBuffer[j++] = temp / 32768.0;
+        }
+    } else if (data->bitsPerSample == 8) {
+        for (int k = i; i < (k + data->dataSize); i++) {
+            uint8_t temp = buffer[i];
+            normBuffer[j++] = (temp-128) / 128.0;
+        }
+    } else {
+        printf("Bit depth is not supported\n");
+        normBuffer = NULL;
     }
 
     return normBuffer;
 }
 
+
 /*
 Reads the data-chunk and checks if the audio is in 16bit or 8 bit per sample. Then Normalizes it and returns a float* with normalized values
 */
 float* toBuffer(struct WavMetadata *data, int i, uint8_t *buffer){
-    int fs = 0;
+    int dataSize = 0;
     int shift = 0;
+    /*Read the size of the fmt chunk*/
     for (int j = i; i < j+4; i++) { 
-        fs |= buffer[i]<< shift; 
+        dataSize |= buffer[i]<< shift; 
         shift += 8;
     }
 
-    int dataSize = fs;
     data->dataSize = dataSize;
     data->bytesPerSample = data->bitsPerSample / 8;
     data->sampleCount = dataSize / data->bytesPerSample;
     data->frameCount = dataSize / data->blockAlign;
 
-    if (data->bitsPerSample == 16) { 
-        return buffer16Bit(i, buffer, data);
-    
-    } else if (data->bitsPerSample == 8) {
-        return buffer8Bit(i, buffer, data);
-    } else {
-        printf("Bit depth is not supported\n");
-        return NULL;
-    }
+    return normalize(i, buffer, data);
 }
 
 /*
@@ -193,12 +181,17 @@ bool AFCheck(uint8_t *buffer, long file_size, struct WavMetadata *data){
         return false;
     }
 
+    bool found = false;
     for (int i = 12; i < file_size; i++) { 
         if ((buffer[i] == 0x66) && (buffer[i+1] == 0x6D) && (buffer[i+2] == 0x74) && (buffer[i+3] == 0x20)) { //searches for "fmt "
             readMeta(buffer, i+8, data);
+            found = true;
         } 
     }
-    printf("\n");
+    if (!found) {
+        printf("File is not a valid wave file.\n");
+        return false;
+    }
 
 
     if (data->audioFormat != 1) {
@@ -217,6 +210,7 @@ Read the audio file from the file pointer. From the file, meta data is extracted
 bool readWaveFile(FILE* fptr, struct AudioFile *audio){
     fseek(fptr, 0, SEEK_END);
     long file_size = ftell(fptr);
+    //TODO: Since rewind() does not return a value, an application wishing to detect errors should clear errno, then call rewind(), and if errno is non-zero, assume an error has occurred.
     rewind(fptr);
 
     uint8_t *buffer = malloc(file_size);
@@ -233,14 +227,14 @@ bool readWaveFile(FILE* fptr, struct AudioFile *audio){
     
     bool found = false;
     for (int i = 12; i< file_size; i++) {
-        if ((buffer[i] == 0x64) && (buffer[i+1] == 0x61) && (buffer[i+2] == 0x74) && (buffer[i+3] == 0x61)) {
+        if ((buffer[i] == 0x64) && (buffer[i+1] == 0x61) && (buffer[i+2] == 0x74) && (buffer[i+3] == 0x61)) { //TODO: Maybe optimize this because we find data chunk in the AFCheck function alreade
             audio->samples = toBuffer(&audio->metadata, i+4, buffer);
             found = true;
         } 
     }
     printf("\n");
     if (!found) {
-        printf("File is nog a valid wave-file, data chunk cannot be found\n");
+        printf("File is not a valid wave-file, data chunk cannot be found\n");
         return false;
     }
 
